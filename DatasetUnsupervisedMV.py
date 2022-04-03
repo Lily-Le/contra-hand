@@ -8,7 +8,7 @@ from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 from scipy.ndimage.morphology import binary_erosion
 from utils.general import get_dataset_path, json_load
- 
+# export QT_DEBUG_PLUGINS=1
 
 def mix(fg_img, mask_fg, bg_img, do_smoothing, do_erosion):
     """ Mix fg and bg image. Keep the fg where mask_fg is True. """
@@ -186,7 +186,7 @@ def get_dataset(batch_size):
         #normalize
     ]
 
-    dataset = DatasetUnsupervisedMultiview(None, transforms.Compose(augmentation),
+    dataset = DatasetUnsupervisedMultiview("/home/d3-ai/cll/HanCo_tester/", transforms.Compose(augmentation),
                                            cross_camera=False,
                                            cross_time=False,
                                            cross_bg=False)

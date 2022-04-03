@@ -3,9 +3,11 @@ import numpy as np
 import json
 import os
 import cv2
+import os
 
 def get_dataset_path():
-    return "/misc/lmbraid18/zimmermc/datasets/FreiHAND_full/"
+    # return "/misc/lmbraid18/zimmermc/datasets/FreiHAND_full/"
+    return ""
 
 def load_ckpt(model, pretrained_dict):
     model_dict = model.state_dict()

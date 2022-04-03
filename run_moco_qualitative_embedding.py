@@ -1,6 +1,7 @@
 """ Script to produce the data for Figure 3 of the paper. """
 import numpy as np
 import cv2, os
+
 import matplotlib.pyplot as plt
 from run_moco_fw import ModelWrap
 

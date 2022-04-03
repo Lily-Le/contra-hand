@@ -22,6 +22,7 @@ Modules included:
 import chumpy as ch
 import numpy as np
 import cv2
+import os
 
 
 class Rodrigues(ch.Ch):

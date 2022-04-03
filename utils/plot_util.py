@@ -1,6 +1,7 @@
 from __future__ import print_function, unicode_literals
 import numpy as np
 import cv2
+import os
 
 
 def draw_hand(image, coords_hw, vis=None, color_fixed=None, linewidth=3, order='hw', img_order='rgb',

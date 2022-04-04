@@ -20,7 +20,6 @@ Visit our [project page](https://lmb.informatik.uni-freiburg.de/projects/contra-
     pip install pytorch3d transforms3d tqdm pytorch-lightning imgaug open3d matplotlib
     pip install git+https://github.com/hassony2/chumpy.git
 
-
 ### Hand Pose Dataset
 
 You either need the [full HanCo dataset](https://lmb.informatik.uni-freiburg.de/resources/datasets/HanCo.en.html) or the small [tester data sample](https://lmb.informatik.uni-freiburg.de/data/HanCo/HanCo_tester.zip) (recommended).

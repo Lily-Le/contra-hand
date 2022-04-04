@@ -5,7 +5,7 @@ import os
 import numpy as np
 import torch
 import torch.nn as nn
-
+import matplotlib.pyplot as plt
 from nets.ResNet import resnet50
 
 
@@ -23,11 +23,14 @@ class ModelWrap:
 
     def run(self, image_file):
         img = cv2.imread(os.path.join(self.base_path, image_file))
+        print(img.shape)
         img = cv2.resize(img, (224, 224))
-
+        plt.imshow(img)
         trafo = lambda x: np.transpose(x[:, :, ::-1], [2, 0, 1]).astype(np.float32) / 255.0 - 0.5
         img_t = trafo(img)
+        print(img_t.shape)
         batch = torch.Tensor(np.stack([img_t], 0)).cuda()
+        print(batch.shape)
         embed = self.model(batch)
         embed = embed.detach().cpu().numpy()
 

@@ -86,6 +86,7 @@ class DatasetUnsupervisedMultiview(Dataset):
         return self.size * 8
 
     def __getitem__(self, idx):
+        # sid: 0000-1517
         sid, fid, K_list, M_list = self.dataset[idx % self.size]
         # roll for a random camera
         cid1 = random.randint(0, 7)
@@ -95,14 +96,16 @@ class DatasetUnsupervisedMultiview(Dataset):
         else:
             cid2 = cid1
 
-        fid1 = fid
+        fid1 = fid #frame id
         if self.cross_time:
+            #num of frames in a subset
             s_max = len(self.meta_info['is_train'][sid])-1
+            #timeset -1 0 1, before current next, randomly choose one frame
             fid2 = min(max(0, fid + random.choice(self.timeset)), s_max)
         else:
             fid2 = fid
 
-        if self.meta_info['is_train'][sid][fid]:
+        if self.meta_info['is_train'][sid][fid]: # subsubset id
             subset1 = random.choice(self.subsets)
             subset2 = random.choice(self.subsets)
         else:
@@ -163,6 +166,8 @@ class DatasetUnsupervisedMultiview(Dataset):
 
         return Image.fromarray(merged)
 
+    # def hand_aug(self,sid, fid, cid):
+
 
 def get_dataset(batch_size):
     normalize = transforms.Normalize(mean=[0.5, 0.5, 0.5],
@@ -191,12 +196,11 @@ def get_dataset(batch_size):
                                            cross_time=False,
                                            cross_bg=False)
 
-    return torch.utils.data.DataLoader(dataset,
-                                       batch_size=batch_size,
-                                       shuffle=True,
-                                       num_workers=8)
-
-
+    # return torch.utils.data.DataLoader(dataset,
+    #                                    batch_size=batch_size,
+    #                                    shuffle=True,
+    #                                    num_workers=8)
+    return dataset
 if __name__ == '__main__':
     batch_size = 3
     d = get_dataset(batch_size)

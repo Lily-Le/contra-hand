@@ -31,43 +31,43 @@ def show(path1, path2, save_to=None):
     ax[1].set_title('score = %.3f' % s)
     plt.show()
 
-
+root_dir='/home/d3-ai/cll/contra-hand'
 # 1. show same image image pairs with different backgrounds is encoded the same
 for i in (0, 5, 7):
     show('0108/cam4/00000017_%d.jpg' % i, '0108/cam4/00000017_%d.jpg' % (i+1),
-         save_to='./moco_vis_ex/same_sample_diff_bg/%02d' % i)
+         save_to = root_dir+'/moco_vis_ex/same_sample_diff_bg/%02d' % i)
 
 # 2. Show similar poses are encoded similarly
 i = 2
 show('0007/cam4/00000016_5.jpg', '0007/cam4/00000017_4.jpg',
-         save_to='./moco_vis_ex/similar_poses/%02d' % i)
+         save_to = root_dir+'/moco_vis_ex/similar_poses/%02d' % i)
 i = 3
 show('0011/cam4/00000004_0.jpg', '0011/cam4/00000005_1.jpg',
-         save_to='./moco_vis_ex/similar_poses/%02d' % i)
+         save_to = root_dir+'/moco_vis_ex/similar_poses/%02d' % i)
 i = 4
 show('0011/cam4/00000011_1.jpg', '0011/cam4/00000012_2.jpg',
-         save_to='./moco_vis_ex/similar_poses/%02d' % i)
+         save_to = root_dir+'/moco_vis_ex/similar_poses/%02d' % i)
 
 
 # 3. Different views are encoded similarly
 i = 0
 show('0108/cam4/00000026_3.jpg', '0108/cam3/00000026_5.jpg',
-   save_to='./moco_vis_ex/diff_view/%02d' % i)
+   save_to = root_dir+'/moco_vis_ex/diff_view/%02d' % i)
 i = 1
 show('0011/cam4/00000012_2.jpg', '0011/cam3/00000012_5.jpg',
-   save_to='./moco_vis_ex/diff_view/%02d' % i)
+   save_to = root_dir+'/moco_vis_ex/diff_view/%02d' % i)
 i = 3
 show('0011/cam4/00000005_1.jpg', '0011/cam3/00000005_6.jpg',
-   save_to='./moco_vis_ex/diff_view/%02d' % i)
+   save_to = root_dir+'/moco_vis_ex/diff_view/%02d' % i)
 
 
 # 3. Different poses are encoded differently
 i = 0
 show('0007/cam4/00000000_3.jpg', '0007/cam4/00000018_3.jpg',
-         save_to='./moco_vis_ex/diff_poses/%02d' % i)
+         save_to = root_dir+'/moco_vis_ex/diff_poses/%02d' % i)
 i = 1
 show('0108/cam4/00000007_0.jpg', '0108/cam4/00000019_0.jpg',
-         save_to='./moco_vis_ex/diff_poses/%02d' % i)
+         save_to = root_dir+'/moco_vis_ex/diff_poses/%02d' % i)
 i = 3
 show('0007/cam3/00000015_2.jpg', '0108/cam3/00000026_2.jpg',
-         save_to='./moco_vis_ex/diff_poses/%02d' % i)
+         save_to = root_dir+'/moco_vis_ex/diff_poses/%02d' % i)

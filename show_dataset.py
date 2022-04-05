@@ -173,9 +173,9 @@ def example_show_shape(args, sid, fid, cid):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('hanco_path', type=str, help='Path to where HanCo dataset is stored.')
+    # parser.add_argument('hanco_path', type=str, help='Path to where HanCo dataset is stored.')
     args = parser.parse_args()
-
+    args.hanco_path='/home/d3-ai/cll/HanCo_tester'
     assert os.path.exists(args.hanco_path), 'Path to HanCo not found.'
     assert os.path.isdir(args.hanco_path), 'Path to HanCo doesnt seem to be a directory.'
 
@@ -190,4 +190,4 @@ if __name__ == '__main__':
     example_show_keypoints(args, sid=110, fid=24, cid=3)
 
     # Example4: Render MANO shape, show 
-    example_show_shape(args, sid=110, fid=24, cid=3)
+    # example_show_shape(args, sid=110, fid=24, cid=3)

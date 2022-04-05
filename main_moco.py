@@ -101,11 +101,12 @@ parser.add_argument('--cos', action='store_true',
 
 def main():
     args = parser.parse_args()
-
+    args.save_path = '/media/d3-ai/E/cll/Results/MoCo/'
     args.world_size=1
+    args.workers = 0
     args.rank=0
     args.dist_url='tcp://localhost:10001'
-    args.batch_size=1
+    args.batch_size=128
     args.multiprocessing_distributed=True
     if args.seed is not None:
         random.seed(args.seed)
@@ -282,7 +283,7 @@ def main_worker(gpu, ngpus_per_node, args):
                 'arch': args.arch,
                 'state_dict': model.state_dict(),
                 'optimizer' : optimizer.state_dict(),
-            }, is_best=False, filename='checkpoint_{:04d}.pth.tar'.format(epoch))
+            }, is_best=False, filename=args.save_path+'test/'+'checkpoint_{:04d}.pth.tar'.format(epoch))
 
 
 def train(train_loader, model, criterion, optimizer, epoch, args):

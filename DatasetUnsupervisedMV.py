@@ -4,12 +4,13 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 import torch
+from scipy.ndimage import gaussian_filter
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 from scipy.ndimage.morphology import binary_erosion
 from utils.general import get_dataset_path, json_load
 # export QT_DEBUG_PLUGINS=1
-
+import moco
 def mix(fg_img, mask_fg, bg_img, do_smoothing, do_erosion):
     """ Mix fg and bg image. Keep the fg where mask_fg is True. """
     assert bg_img.shape == fg_img.shape
@@ -145,9 +146,9 @@ class DatasetUnsupervisedMultiview(Dataset):
 
     def read_rnd_background(self, sid, fid, cid, subset):
         # sample rnd background
-        base_path = '/misc/lmbraid18/zimmermc/'
+        base_path = '/media/d3-ai/E/cll/handCo/'
         rid = random.randint(0, 1230)
-        bg_image_new_path = os.path.join(base_path, 'background_subtraction/background_examples/bg_new/%05d.jpg' % rid)
+        bg_image_new_path = os.path.join(base_path, 'bg_new/%05d.jpg' % rid)
         bg_img_new = Image.open(bg_image_new_path)
 
         mask_path = 'mask_hand/%04d/cam%d/%08d.jpg' % (sid, cid, fid)
@@ -186,13 +187,13 @@ def get_dataset(batch_size):
             transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
         ], p=0.8),
         transforms.RandomGrayscale(p=0.2),
-        #transforms.RandomApply([moco.loader.GaussianBlur([.1, 2.])], p=0.5),
+        transforms.RandomApply([moco.loader.GaussianBlur([.1, 2.])], p=0.5),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        #normalize
+        normalize
     ]
 
-    dataset = DatasetUnsupervisedMultiview("/home/d3-ai/cll/HanCo_tester/", transforms.Compose(augmentation),
+    dataset = DatasetUnsupervisedMultiview("/media/d3-ai/E/cll/handCo/", transforms.Compose(augmentation),
                                            cross_camera=False,
                                            cross_time=False,
                                            cross_bg=False)

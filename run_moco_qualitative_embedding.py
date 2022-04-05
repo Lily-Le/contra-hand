@@ -4,7 +4,7 @@ import cv2, os
 
 import matplotlib.pyplot as plt
 from run_moco_fw import ModelWrap
-
+import moco
 
 m = ModelWrap()
 data_path = m.base_path

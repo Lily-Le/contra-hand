@@ -14,9 +14,9 @@ meta_info = json_load(os.path.join(base_path, 'meta.json'))
 # pos=meta_info['is_train'][meta_info['is_train']==True].index()
 
 ist=meta_info['is_train']
-for i in range(len(ist)):
+for i in range(int(len(ist)/2)):
     subset=(ist[i])
     inx.extend([[i,j,0,0] for j, x in enumerate(subset) if x == True])
-with open('index_mv_unsup_weak.json','w') as f:
+with open('index_mv_unsup_weak2.json','w') as f:
     json.dump(inx,f)
 f.close()

@@ -102,12 +102,12 @@ parser.add_argument('--cos', action='store_true',
 def main():
     args = parser.parse_args()
     args.save_path = '/media/d3-ai/E/cll/Results/MoCo/'
-    args.world_size=1
-    args.workers = 0
-    args.rank=0
-    args.dist_url='tcp://localhost:10001'
-    args.batch_size=128
-    args.multiprocessing_distributed=True
+    # args.world_size=1
+    # args.workers = 0
+    # args.rank=0
+    # args.dist_url='tcp://localhost:10001'
+    # args.batch_size=128
+    # args.multiprocessing_distributed=True
     if args.seed is not None:
         random.seed(args.seed)
         torch.manual_seed(args.seed)
@@ -266,8 +266,8 @@ def main_worker(gpu, ngpus_per_node, args):
 
     train_loader = torch.utils.data.DataLoader(train_dataset,
                                        batch_size=args.batch_size,
-                                       shuffle=True,
-                                       num_workers=8)
+                                       shuffle=True)#,
+                                       # num_workers=8)
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
             train_sampler.set_epoch(epoch)
@@ -331,7 +331,13 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
 
         if i % args.print_freq == 0:
             progress.display(i)
-
+        if i%50 ==0:
+            save_checkpoint({
+                'epoch': epoch ,
+                'arch': args.arch,
+                'state_dict': model.state_dict(),
+                'optimizer' : optimizer.state_dict(),
+            }, is_best=False, filename=args.save_path+'test/'+'checkpoint_{:04d}_{:04d}.pth.tar'.format(epoch,i))
 
 def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
     torch.save(state, filename)

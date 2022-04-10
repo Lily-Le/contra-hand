@@ -4,5 +4,5 @@
     "debug.console.fontSize": 20,
     "markdown.preview.fontSize": 20,
     "terminal.integrated.fontSize": 20,
-    "python.defaultInterpreterPath": "/home/d3-ai/anaconda3/envs/cll_py36/bin/python"
+    "python.defaultInterpreterPath": "/home/d3-ai/anaconda3/envs/cll/bin/python"
 }

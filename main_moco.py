@@ -9,6 +9,11 @@ import shutil
 import time
 import warnings
 
+import json
+import sys
+import pandas as pd
+
+
 import torch
 import torch.nn as nn
 import torch.nn.parallel
@@ -21,7 +26,8 @@ import torch.utils.data.distributed
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
-
+from torch.utils.tensorboard import SummaryWriter
+from datetime import datetime
 import moco.loader
 import moco.builder
 from DatasetUnsupervisedMV import DatasetUnsupervisedMultiview, get_dataset
@@ -98,16 +104,37 @@ parser.add_argument('--aug-plus', action='store_true',
 parser.add_argument('--cos', action='store_true',
                     help='use cosine lr schedule')
 
+log_dir = '/media/d3-ai/E/cll/Results/MoCo/log'
+
+check_dir = '/media/d3-ai/E/cll/Results/MoCo/checkpoint'
+if not os.path.exists(check_dir):
+        os.makedirs(check_dir)
+if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+# writer = SummaryWriter(log_dir=log_dir)
+
+start_time =  time.time()
+last_logging = time.time()
+stats_file = open(log_dir+ "/stats.txt", "a", buffering=1)
+# print(" ".join(sys.argv))
+# print(" ".join(sys.argv), file=stats_file)
 
 def main():
+
     args = parser.parse_args()
     args.save_path = '/media/d3-ai/E/cll/Results/MoCo/'
-    # args.world_size=1
-    # args.workers = 0
-    # args.rank=0
-    # args.dist_url='tcp://localhost:10001'
-    # args.batch_size=128
-    # args.multiprocessing_distributed=True
+    args.results_dir = '/media/d3-ai/E/cll/Results/MoCo' + datetime.now().strftime("%Y-%m-%d-%H-%M-%S-moco")
+    if args.results_dir == '':
+        args.results_dir = './cache-' + datetime.now().strftime("%Y-%m-%d-%H-%M-%S-moco")
+    # args.writer= writer
+
+    args.world_size=1
+    args.workers = 8
+    args.rank=0
+    args.dist_url='tcp://localhost:10001'
+    args.batch_size=128
+    args.multiprocessing_distributed=True
+
     if args.seed is not None:
         random.seed(args.seed)
         torch.manual_seed(args.seed)
@@ -250,9 +277,9 @@ def main_worker(gpu, ngpus_per_node, args):
             transforms.ToTensor(),
             normalize
         ]
-
-    # train_dataset = datasets.ImageFolder(
-    #     traindir,
+    # tt = '/media/d3-ai/E/cll/Dataset/TinyImageNet/tiny-imagenet-200/tiny-imagenet-200'
+    # train_dataset_ = datasets.ImageFolder(
+    #     tt,
     #     moco.loader.TwoCropsTransform(transforms.Compose(augmentation)))
     train_dataset = get_dataset(args.batch_size)
     if args.distributed:
@@ -260,33 +287,67 @@ def main_worker(gpu, ngpus_per_node, args):
     else:
         train_sampler = None
 
-    # train_loader = torch.utils.data.DataLoader(
-    #     train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
+        num_workers=args.workers, pin_memory=True, sampler=train_sampler, drop_last=True)
+    # train_loader_ = torch.utils.data.DataLoader(
+    #     train_dataset_, batch_size=args.batch_size, shuffle=(train_sampler is None),
     #     num_workers=args.workers, pin_memory=True, sampler=train_sampler, drop_last=True)
-
-    train_loader = torch.utils.data.DataLoader(train_dataset,
-                                       batch_size=args.batch_size,
-                                       shuffle=True)#,
+    # train_loader__ = torch.utils.data.DataLoader(train_dataset,
+    #                                    batch_size=args.batch_size,
+    #                                    shuffle=True)#,
                                        # num_workers=8)
+    # logging
+    results = {'epoch':[], 'loss': [], 'acc@1': [],'acc@5':[]}
+    if not os.path.exists(args.results_dir):
+        os.mkdir(args.results_dir)
+    # dump args
+    # with open(args.results_dir + '/args.json', 'w') as fid:
+    #     json.dump(args.__dict__, fid, indent=2)
+    
+
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
             train_sampler.set_epoch(epoch)
         adjust_learning_rate(optimizer, epoch, args)
-
+        
         # train for one epoch
-        train(train_loader, model, criterion, optimizer, epoch, args)
+        d = train(train_loader, model, criterion, optimizer, epoch, args)
+        results['loss'].append(d['loss'])
+        results['acc@1'].append(d['acc1'])
+        results['acc@5'].append(d['acc5'])
+        results['epoch'].append(epoch)
+    # save statistics
+        # data_frame = pd.DataFrame(data=results, index=range(args.start_epoch, epoch + 1))
+        # data_frame.to_csv(args.results_dir + '/log.csv', index_label='epoch')
+    # step_result={'train_loss':train_loss, 'test_acc@1':test_acc_1}
 
+        
         if not args.multiprocessing_distributed or (args.multiprocessing_distributed
-                and args.rank % ngpus_per_node == 0):
+                and args.rank % ngpus_per_node == 0 and epoch%25==0):
             save_checkpoint({
                 'epoch': epoch + 1,
+                # 'step': (epoch+1)*args.batch_size,r
                 'arch': args.arch,
                 'state_dict': model.state_dict(),
                 'optimizer' : optimizer.state_dict(),
-            }, is_best=False, filename=args.save_path+'test/'+'checkpoint_{:04d}.pth.tar'.format(epoch))
+            }, is_best=False, filename=log_dir+'checkpoint_{:04d}.pth.tar'.format(epoch))
+            
+            json_str = json.dumps(torch.stack(results), ensure_ascii=False, indent=4) #字符缩进4
+            json_path = log_dir+'log_{:04d}.json'.format(epoch)
+            with open(json_path, 'w') as json_file:
+                json_file.write(json_str)
+    save_checkpoint({
+                'epoch': epoch + 1,
+                # 'step': (epoch+1)*args.batch_size,r
+                'arch': args.arch,
+                'state_dict': model.state_dict(),
+                'optimizer' : optimizer.state_dict(),
+            }, is_best=False, filename=log_dir+'checkpoint_{:04d}.pth.tar'.format(epoch))
 
 
-def train(train_loader, model, criterion, optimizer, epoch, args):
+
+def train(train_loader, model, criterion, optimizer, epoch,args):
     batch_time = AverageMeter('Time', ':6.3f')
     data_time = AverageMeter('Data', ':6.3f')
     losses = AverageMeter('Loss', ':.4e')
@@ -329,15 +390,35 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         batch_time.update(time.time() - end)
         end = time.time()
 
-        if i % args.print_freq == 0:
+        # current_time = time.time()
+        # if current_time - last_logging > 60:
+        #         stats = dict(
+        #             epoch=epoch,
+        #             step=epoch*args.batch_size+i,
+        #             loss=loss.item(),
+        #             time=int(current_time - start_time),
+        #             lr=args.lr,
+        #         )
+        #         # print(json.dumps(stats))
+        #         # print(json.dumps(stats), file=stats_file)
+        #         last_logging = current_time
+                # print(" ".join(sys.argv))
+                # print(" ".join(sys.argv), file=stats_file)
+        
+        if i % args. print_freq == 0:
             progress.display(i)
-        if i%50 ==0:
-            save_checkpoint({
-                'epoch': epoch ,
-                'arch': args.arch,
-                'state_dict': model.state_dict(),
-                'optimizer' : optimizer.state_dict(),
-            }, is_best=False, filename=args.save_path+'test/'+'checkpoint_{:04d}_{:04d}.pth.tar'.format(epoch,i))
+        # if i%50 ==0:
+        #     save_checkpoint({
+        #         'epoch': epoch ,
+        #         'step': i,
+        #         'arch': args.arch,
+        #         'state_dict': model.state_dict(),
+        #         'optimizer' : optimizer.state_dict(),
+        #     }, is_best=False, filename=log_dir+'checkpoint_{:04d}_{:04d}.pth.tar'.format(epoch,i))
+        d = {'loss': loss, 'acc1': acc1[0],
+                 'acc5': acc5[0]}
+            # writer.add_scalars(main_tag='losses_acc', tag_scalar_dict=d, global_step=i+ epoch*args.batch_size)
+    return d
 
 def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
     torch.save(state, filename)
@@ -345,7 +426,7 @@ def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
         shutil.copyfile(filename, 'model_best.pth.tar')
 
 
-class AverageMeter(object):
+class AverageMeter(object):                                                                         
     """Computes and stores the average and current value"""
     def __init__(self, name, fmt=':f'):
         self.name = name

@@ -10,7 +10,7 @@ import torchvision.transforms as transforms
 from scipy.ndimage.morphology import binary_erosion
 from utils.general import get_dataset_path, json_load
 # export QT_DEBUG_PLUGINS=1
-import moco
+import moco.loader
 def mix(fg_img, mask_fg, bg_img, do_smoothing, do_erosion):
     """ Mix fg and bg image. Keep the fg where mask_fg is True. """
     assert bg_img.shape == fg_img.shape
@@ -34,6 +34,7 @@ def mix(fg_img, mask_fg, bg_img, do_smoothing, do_erosion):
 
 
 class DatasetUnsupervisedMultiview(Dataset):
+
     def __init__(self,  root=None, transform=None, cross_camera=False,
                  cross_time=False, cross_bg=False):
         print("Starting to load multiview data.")
@@ -45,9 +46,9 @@ class DatasetUnsupervisedMultiview(Dataset):
         self.cross_time = cross_time
         self.cross_bg = cross_bg
 
-        self.subsets = ['gs', 'merged', 'homo', 'color_auto']  # 'color_sample']
+        self.subsets = ['gs', 'merged', 'homo']#, 'color_auto']  # 'color_sample']
         #self.subsets = ['gs', ]
-
+        self.bg_inds = json_load('/home/d3-ai/cll/contra-hand/bg_inds.json')
         if self.cross_bg:
             self.subsets = ['mask_hand']
 
@@ -66,8 +67,8 @@ class DatasetUnsupervisedMultiview(Dataset):
         self.timeset = (-1, 0, 1)
         # load meta info file
         self.meta_info = json_load(os.path.join(self.base_path, 'meta.json'))
-        self.dataset = json_load(os.path.join(self.base_path, 'index_mv_unsup_weak.json'))
-
+        # self.dataset = json_load(os.path.join(self.base_path, 'index_mv_unsup_weak2.json'))
+        self.dataset = json_load('/home/d3-ai/cll/contra-hand/index_mv_unsup_weak10.json')
         random.shuffle(self.dataset)
         self.size = len(self.dataset)
 
@@ -141,14 +142,18 @@ class DatasetUnsupervisedMultiview(Dataset):
         path = os.path.join(self.base_path, img_path)
         with open(path, 'rb') as f:
             img = Image.open(f)
+            # h,w = img.size()
+            img = img.resize([64,64], resample=0)
             return img.convert('RGB')
 
 
     def read_rnd_background(self, sid, fid, cid, subset):
         # sample rnd background
         base_path = '/media/d3-ai/E/cll/handCo/'
-        rid = random.randint(0, 1230)
-        bg_image_new_path = os.path.join(base_path, 'bg_new/%05d.jpg' % rid)
+
+        rid = random.randint(0, 524)
+        # bg_image_new_path = os.path.join(base_path, 'bg_new/%05d.jpg' % rid)
+        bg_image_new_path = os.path.join(base_path+'bg_new', self.bg_inds[rid])
         bg_img_new = Image.open(bg_image_new_path)
 
         mask_path = 'mask_hand/%04d/cam%d/%08d.jpg' % (sid, cid, fid)
@@ -172,10 +177,11 @@ class DatasetUnsupervisedMultiview(Dataset):
 
 
 def get_dataset(batch_size):
+    # import moco.loader
     normalize = transforms.Normalize(mean=[0.5, 0.5, 0.5],
                                      std=[1.0, 1.0, 1.0])
 
-    img_size = 112  # running with 224 resolution did not improve results
+    img_size = 64 # running with 224 resolution did not improve results
     print("Warning: Un-comment augmentations for training")
 
     # these are the agumentations as we use for our moco pre-training
@@ -193,7 +199,7 @@ def get_dataset(batch_size):
         normalize
     ]
 
-    dataset = DatasetUnsupervisedMultiview("/media/d3-ai/E/cll/handCo/", transforms.Compose(augmentation),
+    dataset = DatasetUnsupervisedMultiview("/home/d3-ai/cll/HanCo/", transforms.Compose(augmentation),
                                            cross_camera=False,
                                            cross_time=False,
                                            cross_bg=False)
@@ -206,7 +212,10 @@ def get_dataset(batch_size):
 if __name__ == '__main__':
     batch_size = 3
     d = get_dataset(batch_size)
-    
+    d = torch.utils.data.DataLoader(d, \
+                                       batch_size=batch_size,\
+                                       shuffle=True,\
+                                       num_workers=8)
     for sample in d:
         data, label = sample
         for i in range(batch_size):

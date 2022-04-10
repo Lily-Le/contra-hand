@@ -15,8 +15,9 @@ class ModelWrap:
         model.cuda()
         model.eval()
 
-        state_dict = torch.load('ckpt/model_moco.pth')
-        model.load_state_dict(state_dict)
+        # state_dict = torch.load('ckpt/model_moco.pth')
+        checkpoint = torch.load('/media/d3-ai/E/cll/Results/MoCo/logcheckpoint_0125.pth.tar')
+        model.load_state_dict(checkpoint['state_dict'])
 
         self.model = model
         self.base_path = "./rgb_variants/"

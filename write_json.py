@@ -17,12 +17,12 @@ print(meta_info.keys())
 #%%
 # pos=meta_info['is_train'][meta_info['is_train']==True].index()
 
-ist=meta_info['is_train']
+ist=meta_info['is_valid']
 obj=meta_info['object_id']
-for i in range(int(int(len(ist)/10))):
+for i in range(int(int(len(ist)))):
     subset=(ist[i])
     inx.extend([[i,j,0,0] for j, x in enumerate(subset) if x == True])
-with open('index_mv_unsup_weak10.json','w') as f:
+with open('index_mv_unsup_weak_vld.json','w') as f:
     json.dump(inx,f)
 f.close()
 
@@ -36,7 +36,7 @@ with open('index_mv_unsup_weak_tv.json','w') as f:
     json.dump(inx,f)
 f.close()
 #%% Find index in the background
-bg_path='/media/d3-ai/E/cll/handCo/bg_new/'
+bg_path='/home/d3-ai/cll/HanCo/bg_new/'
 bg_lst=os.listdir(bg_path)
 with open('bg_inds.json','w') as f:
     json.dump(bg_lst,f)

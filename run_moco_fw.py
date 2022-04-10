@@ -7,11 +7,16 @@ import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
 from nets.ResNet import resnet50
-
+import moco.loader
+import moco.builder
+import torchvision.models as models
 
 class ModelWrap:
     def __init__(self):
         model = resnet50(pretrained=False, head_type='embed')
+        model = moco.builder.MoCo(
+            models.__dict__["resnet50"],
+            128, 65536, 0.999, 0.07, False )
         model.cuda()
         model.eval()
 

@@ -68,7 +68,7 @@ class DatasetUnsupervisedMultiview(Dataset):
         # load meta info file
         self.meta_info = json_load(os.path.join(self.base_path, 'meta.json'))
         # self.dataset = json_load(os.path.join(self.base_path, 'index_mv_unsup_weak2.json'))
-        self.dataset = json_load('/home/d3-ai/cll/contra-hand/index_mv_unsup_weak10.json')
+        self.dataset = json_load('/home/d3-ai/cll/contra-hand/index_mv_unsup_weak_vld.json')
         random.shuffle(self.dataset)
         self.size = len(self.dataset)
 
@@ -149,9 +149,9 @@ class DatasetUnsupervisedMultiview(Dataset):
 
     def read_rnd_background(self, sid, fid, cid, subset):
         # sample rnd background
-        base_path = '/media/d3-ai/E/cll/handCo/'
+        base_path = '/home/d3-ai/cll/HanCo/'
 
-        rid = random.randint(0, 524)
+        rid = random.randint(0, 521)
         # bg_image_new_path = os.path.join(base_path, 'bg_new/%05d.jpg' % rid)
         bg_image_new_path = os.path.join(base_path+'bg_new', self.bg_inds[rid])
         bg_img_new = Image.open(bg_image_new_path)
@@ -202,7 +202,7 @@ def get_dataset(batch_size):
     dataset = DatasetUnsupervisedMultiview("/home/d3-ai/cll/HanCo/", transforms.Compose(augmentation),
                                            cross_camera=False,
                                            cross_time=False,
-                                           cross_bg=False)
+                                           cross_bg=True)
 
     # return torch.utils.data.DataLoader(dataset,
     #                                    batch_size=batch_size,

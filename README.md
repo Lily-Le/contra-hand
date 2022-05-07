@@ -18,7 +18,9 @@ Visit our [project page](https://lmb.informatik.uni-freiburg.de/projects/contra-
     conda install -c pytorch pytorch=1.6.0 torchvision cudatoolkit=10.2
     conda install -c conda-forge -c fvcore fvcore transforms3d
     pip install pytorch3d transforms3d tqdm pytorch-lightning imgaug open3d matplotlib
+
     pip install git+https://github.com/hassony2/chumpy.git
+    pip install git+https://github.com/hassony2/chumpy.git@py3#egg=chumpy
 
 ### Hand Pose Dataset
 

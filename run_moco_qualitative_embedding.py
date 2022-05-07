@@ -9,6 +9,9 @@ import moco
 m = ModelWrap()
 data_path = m.base_path
 
+
+# import torch.distributed as dist
+# dist.init_process_group('gloo', rank=0, world_size=1)
 cossim = lambda x, y: np.sum(x*y)/np.linalg.norm(x, 2)/np.linalg.norm(y, 2)
 
 

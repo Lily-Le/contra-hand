@@ -4,7 +4,7 @@ import numpy as np
 import transforms3d as t3d
 import pickle
 from manopth.manolayer import ManoLayer
-
+import pytorch3d
 from pytorch3d.io import load_objs_as_meshes
 from pytorch3d.structures import Meshes
 from pytorch3d.renderer import (

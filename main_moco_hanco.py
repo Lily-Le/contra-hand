@@ -191,7 +191,7 @@ def main_worker(gpu, ngpus_per_node, args):
     # create model
     print("=> creating model '{}'".format(args.arch))
     # model = moco.builder.MoCo(
-    #     models.__dict__[args.arch],
+    #      resnet50(pretrained=False, head_type='embed'),#models.__dict__[args.arch],
     #     args.moco_dim, args.moco_k, args.moco_m, args.moco_t, args.mlp)
     model = resnet50(pretrained=False, head_type='embed')
     print(model)
@@ -300,8 +300,9 @@ def main_worker(gpu, ngpus_per_node, args):
                                        num_workers=args.workers)
     # logging
     results = {'epoch':[], 'loss': [], 'acc@1': [],'acc@5':[]}
-    if not os.path.exists(args.results_dir):
-        os.mkdir(args.results_dir)
+    # if not os.path.exists(args.results_dir):
+    #     os.mkdir(args.results_dir)
+
     # dump args
     # with open(args.results_dir + '/args.json', 'w') as fid:
     #     json.dump(args.__dict__, fid, indent=2)

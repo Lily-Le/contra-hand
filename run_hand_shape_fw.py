@@ -11,6 +11,8 @@ import cv2
 import os
 
 import time, os, json
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 

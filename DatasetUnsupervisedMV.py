@@ -149,11 +149,7 @@ class DatasetUnsupervisedMultiview(Dataset):
 
     def read_rnd_background(self, sid, fid, cid, subset):
         # sample rnd background
-        base_path = '/home/d3-ai/cll/HanCo/'
-
-        rid = random.randint(0, 521)
-        # bg_image_new_path = os.path.join(base_path, 'bg_new/%05d.jpg' % rid)
-        bg_image_new_path = os.path.join(base_path+'bg_new', self.bg_inds[rid])
+         
         bg_img_new = Image.open(bg_image_new_path)
 
         mask_path = 'mask_hand/%04d/cam%d/%08d.jpg' % (sid, cid, fid)
